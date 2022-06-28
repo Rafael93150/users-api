@@ -22,8 +22,26 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 6,
         maxlength: 1024
+    },
+    picture: {
+        type: String,
+        default: "/uploads/profil/random-user.png"
+    },
+    bio: {
+        type: String,
+        maxlength: 100,
+        default: "Bonjour à tous !"
+    },
+    contacts: {
+        type: [String]
+    },
+    requests_sent: {
+        type: [String]
+    },
+    requests_received: {
+        type: [String]
     }
-}, { versionKey: false });
+}, { timestamps: true, versionKey: false });
 
 userSchema.pre("save", async function(next) {   // encrypted password
     const salt = await bcrypt.genSalt();
