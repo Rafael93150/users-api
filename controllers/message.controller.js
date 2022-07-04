@@ -7,6 +7,41 @@ export const getConvMessages = (req, res) => {     // get all messages
     .catch((err) => console.log(err));
 }
 
+export const getLastMessage = (req, res) => {
+    const { convId } = req.params;
+    MessageModel.aggregate(
+        [
+            {
+                $match: {
+                    convId: convId
+                }
+            },
+            {
+                $addFields: {
+                    duration: {
+                        $divide: [{$subtract: ["$$NOW", "$createdAt"]}, 360000]
+                    }
+                }
+            },
+            {
+                $sort:{
+                    duration: 1
+                }
+            },
+            {
+                $limit: 1
+            },
+            {
+                $project: {
+                    message: 1, duration: 1, _id: 0
+                }
+            }
+        ]
+    )
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
+}
+
 export const newMessage = (req, res) => {    // create a new message
     const senderId = req.body.senderId;
     const convId = req.body.convId;
