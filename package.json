@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js",
+    "watch": "nodemon server.js",
+    "build": "cd client && npm run build"
   },
   "keywords": [],
   "author": "",
