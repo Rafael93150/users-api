@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import express from 'express';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import userRoutes from './routes/user.routes.js';
@@ -7,18 +6,18 @@ import conversationRoutes from './routes/conversation.routes.js'
 import messageRoutes from './routes/message.routes.js'
 import {checkUser, requireAuth} from './middleware/auth.middleware.js';
 import cors from 'cors';
+
+import express from 'express';
+
 import { createServer } from "http";
 import { Server } from "socket.io";
+
 import mongoose from './config/db.js'; // database connection
-import router from './routes/user.routes.js';
+// import router from './routes/user.routes.js';
 
+
+//  app
 const app = express();
-
-const httpServer = createServer();
-const io = new Server(httpServer, {
-  // ...
-});
-
 
 dotenv.config({path: './config/.env'})  // environment variables path
 
@@ -37,19 +36,41 @@ app.use('/api/users', userRoutes); // users requests
 app.use('/api/conversations', conversationRoutes);
 app.use('/api/messages', messageRoutes);
 
-// messages
-io.on('connection', (socket) => {
-  // socket.on('sendMessage', (message, callback) => {
-  //   const user = getUser(socket.id);
-
-  //   io.to(user.room).emit('message', { user: user.name, text: message});
-
-  //   callback();
-  // });
-  console.log('connection');
-})
-
 // server port
 const PORT = process.env.PORT;
 
-app.listen(PORT, () => console.log(`Server running on port: http://localhost:${PORT}`));
+app.set('port', PORT);
+
+
+
+// socket
+const httpServer = createServer(app);
+const io = new Server(httpServer, { cors: { origin: '*' }, autoConnect:'false'  });
+
+let users = []
+
+const addUser = (userId, socketId) => {
+    !users.some(user=>user.userId === userId) &&
+      users.push({ userId, socketId});
+}
+
+// messages
+io.on('connection', (socket) => {
+  console.log('connection');
+
+  // take user id and socket id from user
+
+  socket.on("addUser", userId => {
+    addUser(userId, socket.id);
+    console.log(users);
+  })
+
+  socket.on("msgSent", (message) => {
+    console.log('message reçu :', message);
+  })
+})
+
+
+
+
+httpServer.listen(app.get('port'), () => console.log(`Server running on port: http://localhost:${PORT}`));
