@@ -1,7 +1,0 @@
-node_modules/
-client/node_modules/
-config/.env
-.vscode
-poubelle.js
-.gitignore
-build/
